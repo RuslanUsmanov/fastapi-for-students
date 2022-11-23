@@ -35,6 +35,9 @@ client = TestClient(app)  # создаем тестовый клиент к на
 
 
 def test_create_user():
+    """
+    Тест на создание нового пользователя
+    """
     response = client.post(
         "/users/",
         json={"email": "email@example.com", "password": "qwe123"}
@@ -45,6 +48,10 @@ def test_create_user():
 
 
 def test_create_exist_user():
+    """
+    Проверка случая, когда мы пытаемся добавить существующего пользователя
+    в БД, т.е. когда данный email уже присутствует в БД.
+    """
     response = client.post(
         "/users/",
         json={"email": "email@example.com", "password": "qwe123"}
@@ -55,6 +62,9 @@ def test_create_exist_user():
 
 
 def test_get_users():
+    """
+    Тест на получение списка пользователей из БД
+    """
     response = client.get("/users/")
     assert response.status_code == 200, response.text
     data = response.json()
@@ -62,6 +72,9 @@ def test_get_users():
 
 
 def test_get_user_by_id():
+    """
+    Тест на получение пользователя из БД по его id
+    """
     response = client.get("/users/1")
     assert response.status_code == 200, response.text
     data = response.json()
@@ -69,6 +82,9 @@ def test_get_user_by_id():
 
 
 def test_user_not_found():
+    """
+    Проверка случая, если пользователь с таким id отсутствует в БД
+    """
     response = client.get("/users/2")
     assert response.status_code == 404, response.text
     data = response.json()
@@ -76,6 +92,9 @@ def test_user_not_found():
 
 
 def test_add_item_to_user():
+    """
+    Тест на добавление Item пользователю
+    """
     response = client.post(
         "/users/1/items/",
         json={"title": "SomeBook", "description": "foobar"}
@@ -88,6 +107,9 @@ def test_add_item_to_user():
 
 
 def test_get_items():
+    """
+    Тест на получение списка Item-ов из БД
+    """
     response = client.get("/items/")
     assert response.status_code == 200, response.text
     data = response.json()
