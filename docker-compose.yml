@@ -1,0 +1,44 @@
+# Определяем версию схемы файла, опциональный параметр
+version: "3.9"
+# Определяем список сервисов — services
+# Эти сервисы будут частью нашего приложения
+services:
+  # Имя сервиса
+  app:
+    # Указываем имя, которое будет присвоено контейнеру после запуска
+    container_name: 'fastapi-for-students-app'
+    build:
+      # Контекст сборки в данном случае текущая директория
+      context: .
+      # Имя Docker-файла из которого будет собран образ
+      dockerfile: Dockerfile
+    # Указываем команду, которая будет выполнена при запуске контейнера
+    # поскольку нам нужно выполнить две команды, запускаем их с помощью bash -c ""
+    command: bash -c "alembic upgrade head && gunicorn -w 4 -k uvicorn.workers.UvicornWorker src.main:app -b 0.0.0.0:8000"
+    # Проброс портов
+    ports:
+      - "80:8000"
+    # Задаем переменную окружения для контейнера
+    environment:
+      DATABASE_URL: postgresql://${DB_USER}:${DB_PASSWD}@database:5432/${DB_NAME}
+    # Указваем зависемости контейнера, например этому необходима БД
+    depends_on:
+      - database
+
+  database:
+    # Имя базового образа, здесь используем БД Postgres
+    image: postgres:latest
+    # Указываем, что контейнер должен прослушивать порт 5432
+    expose:
+      - 5432
+    # Задаем переменные окружения для PosgtgreSQL
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWD}
+      POSTGRES_DB: ${DB_NAME}
+    # Перечисляем тома (volumes)
+    # Они будут подключены к файловой системе контейнера с БД
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+volumes:
+  pgdata:
