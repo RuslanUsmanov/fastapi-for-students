@@ -12,7 +12,3 @@ COPY ./alembic.ini /code/alembic.ini
 COPY ./migrations /code/migrations
 # Устанавливаем зависемости
 RUN pip install --no-cache-dir --upgrade -r /code/requirements.txt
-# Применяем миграции
-RUN alembic upgrade head
-# Указываем команду, которая будет выполнена при запуске контейнера
-CMD [ "gunicorn", "-w", "4", "-k", "uvicorn.workers.UvicornWorker", "-b", "0.0.0.0:8000", "src.main:app" ]
