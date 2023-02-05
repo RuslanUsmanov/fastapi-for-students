@@ -166,7 +166,7 @@ $ docker compose build
  => => naming to docker.io/library/fastapi-for-students-app                                     0.0s
 ```
 
-9. Запускаем контейнеры. Для того чтобы не видеть логов можно добавить ключ `-d`.
+9. Запускаем контейнеры. Для того чтобы не видеть логов можно добавить ключ `-d`. ***Внимание!*** Если вы используете `podman-compose` и у вас возникают ошибки при запуске, то смотрите шаг 12. 
 ```bash
 $ docker compose up
 [+] Running 2/2
@@ -182,6 +182,20 @@ Attaching to fastapi-for-students-app, fastapi-for-students-database-1
 ```bash
 $ echo '.env' >> .gitignore
 ```
+
+12. Если возникает ошибка при выполнении `podman-compose up`. То попробуйте выполнить следующее:
+Создайте файл `/etc/containers/containers.conf` со следующим содержимым:
+```
+[network]
+
+# Explicitly use netavark. See https://github.com/containers/podman-compose/issues/455
+network_backend = "netavark"
+```
+Затем принудительно перезапускаем podman:
+```
+$ podman system reset --force
+```
+Теперь заново выполните шаги 8 и 9.
 
 ### Индивидуальное задание.
 
