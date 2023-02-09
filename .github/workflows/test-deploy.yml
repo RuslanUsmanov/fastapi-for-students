@@ -2,7 +2,7 @@ name: Test code and deploy
 
 on:
   push:
-     branches: [main]
+     branches: [master]
 
 jobs:
   test:
