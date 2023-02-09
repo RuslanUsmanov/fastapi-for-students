@@ -1,0 +1,47 @@
+name: Test code and deploy
+
+on:
+  push:
+     branches: [main]
+
+jobs:
+  test:
+    name: Test code
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get code from repo
+        uses: actions/checkout@v3
+      - name: Set-up python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+      - name: Install pytest
+        run: pip install pytest
+      - name: Run tests
+        run: pytest
+  deploy:
+    name: Deploy to server
+    runs-on: ubuntu-latest
+    needs: [test]
+    steps:
+      - name: Get code from repo
+        uses: actions/checkout@v3
+
+      - name: Configure SSH
+        run: |
+          mkdir -p ~/.ssh/
+          echo "${{ secrets.SSH_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          cat >>~/.ssh/config <<END
+          Host yandex_server
+            HostName ${{ secrets.HOST }}
+            User ${{ secrets.LOGIN }}
+            Port ${{ secrets.PORT }}
+            IdentityFile ~/.ssh/id_rsa
+            StrictHostKeyChecking no
+          END
+      - name: Rsync files to server
+        run: rsync -rav --delete * yandex_server:~/
+
+      - name: Run command
+        run: ssh yandex_server 'sudo docker-compose up'
