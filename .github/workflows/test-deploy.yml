@@ -57,18 +57,16 @@ jobs:
       - name: Create .env file
         run: |
           cat >>.env <<END
-          DB_USER=${{ secrets.DB_USER }}"
+          DB_USER=${{ secrets.DB_USER }}
           DB_PASSWD=${{ secrets.DB_PASSWD }}
           DB_NAME=${{ secrets.DB_NAME }}
           END
-          cat .env
         # Отправляем файлы проекта на сервер
       - name: Rsync files to server
         run: rsync -rav * yandex_server:~/project
-        
-        # Отправляем файлы .env на сервер
+        # Отправляем файл .env на сервер
       - name: Rsync files to server
         run: rsync -rav .env yandex_server:~/project/.env
-        # Запускаем запускаем контейнеры на сервере
-#       - name: Run command
-#         run: ssh yandex_server 'sudo docker-compose up -d'
+        # Запускаем контейнеры на сервере
+      - name: Run command
+        run: ssh yandex_server 'sudo docker-compose -f project/docker-compose.yml up -d'
