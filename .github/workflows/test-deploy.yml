@@ -12,7 +12,7 @@ jobs:
     name: Test code
     # Тип ВМ, на которой будет запущена задача
     runs-on: ubuntu-latest
-    # Шаги выполняемые в рамках задачиhttps://imgur.com/3gYIfqf
+    # Шаги выполняемые в рамках задачи
     steps:
         # Получаем код репозитория
       - name: Get code from repo
@@ -56,14 +56,19 @@ jobs:
         # Создаем файл .env, который необходим для docker-compose
       - name: Create .env file
         run: |
-          echo "DB_USER=${{ secrets.DB_USER }}" > .env
-          echo "DB_PASSWD=${{ secrets.DB_PASSWD }}" >> .env
-          echo "DB_NAME=${{ secrets.DB_NAME }}" >> .env
+          cat >>.env <<END
+          DB_USER=${{ secrets.DB_USER }}"
+          DB_PASSWD=${{ secrets.DB_PASSWD }}
+          DB_NAME=${{ secrets.DB_NAME }}
+          END
+          cat .env
         # Отправляем файлы проекта на сервер
-      - name: test .env
-        run: cat .env
       - name: Rsync files to server
         run: rsync -rav * yandex_server:~/project
+        
+        # Отправляем файлы .env на сервер
+      - name: Rsync files to server
+        run: rsync -rav .env yandex_server:~/project/.env
         # Запускаем запускаем контейнеры на сервере
 #       - name: Run command
 #         run: ssh yandex_server 'sudo docker-compose up -d'
