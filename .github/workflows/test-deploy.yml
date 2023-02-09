@@ -60,6 +60,8 @@ jobs:
           echo "DB_PASSWD=${{ secrets.DB_PASSWD }}" >> .env
           echo "DB_NAME=${{ secrets.DB_NAME }}" >> .env
         # Отправляем файлы проекта на сервер
+      - name: test .env
+        run: cat .env
       - name: Rsync files to server
         run: rsync -rav * yandex_server:~/project
         # Запускаем запускаем контейнеры на сервере
