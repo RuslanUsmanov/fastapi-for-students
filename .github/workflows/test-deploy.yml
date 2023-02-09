@@ -1,0 +1,79 @@
+# Имя для данного workflow
+name: Test code and deploy
+# Триггер по которому будет срабатывать workflow, в данном случае при отправке кода в ветку master
+on:
+  push:
+     branches: [master]
+# Перечисление списка задач в данном workflow
+jobs:
+  # Задача тестирования
+  test:
+    # Название задачи
+    name: Test code
+    # Тип ВМ, на которой будет запущена задача
+    runs-on: ubuntu-latest
+    # Шаги выполняемые в рамках задачи
+    steps:
+        # Получаем код репозитория
+      - name: Get code from repo
+        uses: actions/checkout@v3
+        # Устанавливаем python3.10
+      - name: Set-up python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+        # Устанавливаем зависемости
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+        # Запускаем тесты
+      - name: Run tests
+        run: pytest
+        # Для успешного запуска тестов необходимо в переменную окружения DATABASE_URL записать корректную строку подключения к любой БД
+        env:
+          DATABASE_URL: sqlite:///./sqlite.db
+  # Задача развертывания
+  deploy:
+    name: Deploy to server
+    runs-on: ubuntu-latest
+    needs: [test]
+    steps:
+      - name: Get code from repo
+        uses: actions/checkout@v3
+        # Настройка подключения по SSH
+      - name: Configure SSH
+        run: |
+          mkdir -p ~/.ssh/
+          echo "${{ secrets.SSH_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          cat >>~/.ssh/config <<END
+          Host yandex_server
+            HostName ${{ secrets.HOST }}
+            User ${{ secrets.LOGIN }}
+            Port ${{ secrets.PORT }}
+            IdentityFile ~/.ssh/id_rsa
+            StrictHostKeyChecking no
+          END
+        # Создаем файл .env, который необходим для docker-compose
+      - name: Create .env file
+        run: |
+          cat >>.env <<END
+          DB_USER=${{ secrets.DB_USER }}
+          DB_PASSWD=${{ secrets.DB_PASSWD }}
+          DB_NAME=${{ secrets.DB_NAME }}
+          END
+        # Отправляем файлы проекта на сервер
+      - name: Rsync files to server
+        run: rsync -rav * yandex_server:~/project
+        # Отправляем файл .env на сервер
+      - name: Rsync files to server
+        run: rsync -rav .env yandex_server:~/project/.env
+        # Останавливаем контейнеры на сервере
+      - name: Stop containers
+        run: ssh yandex_server 'sudo docker-compose -f project/docker-compose.yml down'
+        # Собираем контейнеры
+      - name: Build containers
+        run: ssh yandex_server 'sudo docker-compose -f project/docker-compose.yml build'
+        # Запускаем контейнеры
+      - name: Run containers
+        run: ssh yandex_server 'sudo docker-compose -f project/docker-compose.yml up -d'
+        
