@@ -67,6 +67,13 @@ jobs:
         # Отправляем файл .env на сервер
       - name: Rsync files to server
         run: rsync -rav .env yandex_server:~/project/.env
-        # Запускаем контейнеры на сервере
-      - name: Run command
+        # Останавливаем контейнеры на сервере
+      - name: Stop containers
+        run: ssh yandex_server 'sudo docker-compose -f project/docker-compose.yml down'
+        # Собираем контейнеры
+      - name: Build containers
+        run: ssh yandex_server 'sudo docker-compose -f project/docker-compose.yml build'
+        # Запускаем контейнеры
+      - name: Run containers
         run: ssh yandex_server 'sudo docker-compose -f project/docker-compose.yml up -d'
+        
