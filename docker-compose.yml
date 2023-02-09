@@ -24,6 +24,7 @@ services:
     # Указваем зависемости контейнера, например этому необходима БД
     depends_on:
       - database
+    restart: on-failure
 
   database:
     # Имя базового образа, здесь используем БД Postgres
@@ -40,5 +41,6 @@ services:
     # Они будут подключены к файловой системе контейнера с БД
     volumes:
       - pgdata:/var/lib/postgresql/data
+    restart: on-failure
 volumes:
   pgdata:
