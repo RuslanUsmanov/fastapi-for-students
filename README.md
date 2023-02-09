@@ -7,6 +7,9 @@
 * Pytest
 * Coverage
 * Docker
+* Docker Compose
+* Github Actions
+
 
 Методические указания к лабораторным работам:
 
@@ -17,3 +20,5 @@
 [Лабораторная работа №7](manuals/lab7.md)
 
 [Лабораторная работа №8](manuals/lab8.md)
+
+[Лабораторная работа №9](manuals/lab9.md)
