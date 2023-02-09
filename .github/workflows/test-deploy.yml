@@ -6,6 +6,7 @@ on:
      branches: [master]
 # Перечисление списка задач в данном workflow
 jobs:
+  # Задача тестирования
   test:
     # Название задачи
     name: Test code
@@ -13,18 +14,24 @@ jobs:
     runs-on: ubuntu-latest
     # Шаги выполняемые в рамках задачиhttps://imgur.com/3gYIfqf
     steps:
+        # Получаем код репозитория
       - name: Get code from repo
         uses: actions/checkout@v3
+        # Устанавливаем python3.10
       - name: Set-up python
         uses: actions/setup-python@v4
         with:
           python-version: '3.10'
+        # Устанавливаем зависемости
       - name: Install dependencies
         run: pip install -r requirements.txt
+        # Запускаем тесты
       - name: Run tests
         run: pytest
+        # Для успешного запуска тестов необходимо в переменную окружения DATABASE_URL записать корректную строку подключения к любой БД
         env:
           DATABASE_URL: sqlite:///./sqlite.db
+  # Задача развертывания
   deploy:
     name: Deploy to server
     runs-on: ubuntu-latest
@@ -32,7 +39,7 @@ jobs:
     steps:
       - name: Get code from repo
         uses: actions/checkout@v3
-
+        # Настройка подключения по SSH
       - name: Configure SSH
         run: |
           mkdir -p ~/.ssh/
@@ -46,8 +53,15 @@ jobs:
             IdentityFile ~/.ssh/id_rsa
             StrictHostKeyChecking no
           END
+        # Создаем файл .env, который необходим для docker-compose
+      - name: Create .env file
+        run: |
+          echo "DB_USER=${{ secrets.DB_USER }}" > .env
+          echo "DB_PASSWD=${{ secrets.DB_PASSWD }}" >> .env
+          echo "DB_NAME=${{ secrets.DB_NAME }}" >> .env
+        # Отправляем файлы проекта на сервер
       - name: Rsync files to server
-        run: rsync -rav --delete * yandex_server:~/
-
-      - name: Run command
-        run: ssh yandex_server 'sudo docker-compose up'
+        run: rsync -rav --delete * yandex_server:~/project
+        # Запускаем запускаем контейнеры на сервере
+#       - name: Run command
+#         run: ssh yandex_server 'sudo docker-compose up -d'
