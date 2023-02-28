@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fastapi-app
+  labels:
+    app: fastapi-app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: fastapi-for-students-pod
+  template:
+    metadata:
+      labels:
+        app: fastapi-for-students-pod
+    spec:
+      containers:
+      - name: fastapi-for-students
+        image: justaway86/fastapi-for-students:latest
+        ports:
+        - containerPort: 8000
+        env:
+        - name: DB_USER
+          valueFrom:
+            secretKeyRef:
+              name: dbsecret
+              key: db-user
+        - name: DB_PASSWD
+          valueFrom:
+            secretKeyRef:
+              name: dbsecret
+              key: db-passwd
+        - name: DB_NAME
+          valueFrom:
+            secretKeyRef:
+              name: dbsecret
+              key: db-name
+        command: ['bash', '-c', "alembic upgrade head && gunicorn -w 4 -k uvicorn.workers.UvicornWorker src.main:app -b 0.0.0.0:8000"]
+      
