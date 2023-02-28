@@ -1,36 +1,38 @@
+# Сначала создаем Service для пода с БД
 apiVersion: v1
-kind: Service
+kind: Service           # Указываем. что создаем Service
 metadata:
   name: postgres
 spec:
   ports:
-  - port: 5432
+  - port: 5432          # Указываем раскрываемый порт
   selector:
-    app: postgres
-  clusterIP: None
+    app: postgres       # Данный сервис будет применяться к поду с меткой app равной postgres
+  clusterIP: None       # Не указываем IP чтобы service явно определялся в под с БД
 ---
+# Теперь создаем Deployment
 apiVersion: apps/v1
-kind: Deployment
+kind: Deployment        # Указываем. что создаем Deployment
 metadata:
   name: postgres
 spec:
   selector:
     matchLabels:
-      app: postgres
+      app: postgres     # данный деплой будет применяться к поду с метрой  app равной postgres
   strategy:
     type: Recreate
-  template:
+  template:             # далее описываем содержимое пода
     metadata:
       labels:
-        app: postgres
+        app: postgres   # указываем его метку
     spec:
-      containers:
-      - image: postgres:latest
-        name: postgres
-        env:
+      containers:                   # описываем контейнер(ы) в поде
+      - image: postgres:latest      # используемый образ
+        name: postgres              # имя контейнера
+        env:                        # перечисляем переменные окружения
         - name: POSTGRES_USER
           valueFrom:
-            secretKeyRef:
+            secretKeyRef:           # в данном случае переменные задаются значениями из секрета dbsecret
               name: dbsecret
               key: db-user
         - name: POSTGRES_PASSWORD
@@ -43,13 +45,13 @@ spec:
             secretKeyRef:
               name: dbsecret
               key: db-name
-        ports:
+        ports:                      # указываем используемый контейнером порт
         - containerPort: 5432
           name: postgres
-        volumeMounts:
+        volumeMounts:               # подключаем хранилище к контейнеру
         - name: postgres-persistent-storage
           mountPath: /var/lib/postgres
-      volumes:
-      - name: postgres-persistent-storage
+      volumes:                            # подключаем PVC к поду
+      - name: postgres-persistent-storage # задаем имя, которе используется выше
         persistentVolumeClaim:
-          claimName: postgres-pv-claim
+          claimName: postgres-pv-claim    # указываем используемый PVC

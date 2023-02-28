@@ -1,12 +1,13 @@
 apiVersion: v1
-kind: Service
+kind: Service                     # Создаем сервис
 metadata:
-  name: fastapi-app-svc
+  name: fastapi-app-svc           # Название сервиса
 spec:
-  type: NodePort
+  type: NodePort                  # Указываем тип
   selector:
-    app: fastapi-for-students-pod
-  ports:
-    - port: 8000
-      targetPort: 8000
-      nodePort: 30000
+    app: fastapi-for-students-pod # Указываем селектор пода
+  ports:                          # Указываем порты
+    - port: 8000                  # Порт пода
+      targetPort: 8000            # По умолчанию совподает со значением port
+      # Опциональное поле. Значение должно находится в диапазоне 30000-32767
+      nodePort: 30000             # Указываем раскрываемый этим сервисом номер порта

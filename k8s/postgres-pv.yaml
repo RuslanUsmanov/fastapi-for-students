@@ -1,26 +1,26 @@
-apiVersion: v1
-kind: PersistentVolume
+apiVersion: v1                # Версия API Kubernetes для этого манифеста
+kind: PersistentVolume        # Тип объекта, который будет создан этим манифестом
 metadata:
-  name: postgres-pv-volume
+  name: postgres-pv-volume    # Имя объекта
   labels:
     type: local
 spec:
-  storageClassName: manual
+  storageClassName: manual    # Создаем хранилище вручную
   capacity:
-    storage: 10Gi
+    storage: 10Gi             # Выделяем 10ГиБ
   accessModes:
-    - ReadWriteOnce
+    - ReadWriteOnce           # Права доступа
   hostPath:
     path: "/mnt/data"
----
+---                           # В одном манифесте можно описать несколько объектов
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: postgres-pv-claim
+  name: postgres-pv-claim     # Имя объекта
 spec:
   storageClassName: manual
   accessModes:
     - ReadWriteOnce
   resources:
     requests:
-      storage: 10Gi
+      storage: 10Gi           # Запрашиваем 10ГиБ
