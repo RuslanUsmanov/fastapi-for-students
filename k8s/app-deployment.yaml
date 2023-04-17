@@ -16,7 +16,7 @@ spec:                     # Описываем характеристики depl
     spec:
       containers:         # Описываем контейнер
       - name: fastapi-for-students
-        image: justaway86/fastapi-for-students:latest
+        image: justaway86/fastapi-for-students:1.0
         ports:
         - containerPort: 8000
         env:              # Задаем переменные окружения
